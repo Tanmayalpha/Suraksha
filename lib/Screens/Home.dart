@@ -8,6 +8,7 @@ import 'package:suraksha/Screens/add_members.dart';
 import 'package:suraksha/Screens/auth/profile.dart';
 import 'package:suraksha/Screens/call_logs.dart';
 import 'package:suraksha/Screens/notification_view.dart';
+import 'package:suraksha/Screens/pay_to_admin.dart';
 import 'package:suraksha/Screens/qr_code.dart';
 import 'package:suraksha/Screens/static_pages/faq.dart';
 import 'package:suraksha/Screens/static_pages/privacy_policy.dart';
@@ -23,6 +24,7 @@ import 'package:suraksha/utils/colors%20.dart';
 import 'package:suraksha/utils/extentions.dart';
 import 'package:suraksha/widgets/app_btn.dart';
 import 'package:suraksha/widgets/drawer.dart';
+// import 'package:url_launcher/url_launcher.dart';
 
 import '../model/getSliders_response.dart';
 import 'auth/login.dart';
@@ -262,6 +264,23 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(
                           color: CustomColors.primaryColor, fontSize: 16)),
                 ),
+                /*ListTile(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => PayScreen(userToken: userData?.data?.user?.token,))).then((value) {
+                      //getProfile();
+                    });
+                  },
+                  leading: const Icon(
+                    Icons.paypal,
+                    color: CustomColors.primaryColor,
+                  ),
+                  title: const Text("Pay to Admin",
+                      style: TextStyle(
+                          color: CustomColors.primaryColor, fontSize: 16)),
+                ),*/
                 ListTile(
                   onTap: () {
                     Navigator.push(
@@ -786,12 +805,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget floatingButton() {
     return InkWell(
-      onTap: () {
+      onTap: () async{
         Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => AddMemberScreen(),
             ));
+        /*if (!await launchUrl(Uri.parse('https://www.google.com/maps/dir/?api=1&origin=22.7469038,%2075.8980404&destination=22.7456224,75.8972469'), mode: LaunchMode.externalApplication)) {
+        throw Exception('Could not launch');
+        }*/
+       // launch('https://www.google.com/maps/dir/?api=1&origin=22.7469038,%2075.8980404&destination=22.7456224,75.8972469',);
+
         /*Navigator.push(
             context,
             MaterialPageRoute(

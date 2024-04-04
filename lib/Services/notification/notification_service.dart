@@ -12,7 +12,7 @@ class LocalNotificationService {
  /* static final FlutterLocalNotificationsPlugin
   _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();*/
 
-  static void initialize() async {
+  static void   initialize() async {
     const InitializationSettings initializationSettings =
     InitializationSettings(
         android: AndroidInitializationSettings(
@@ -122,7 +122,7 @@ class LocalNotificationService {
             priority: Priority.high,
             playSound:true,
            // icon: 'ic_launcher',
-            sound: RawResourceAndroidNotificationSound('test'),
+              sound: RawResourceAndroidNotificationSound('test'),
           ));
       print("my id is ${id.toString()}");
 

@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:suraksha/Screens/pay_to_admin.dart';
 import 'package:suraksha/Services/api_services/apiConstants.dart';
 import 'package:suraksha/Services/api_services/apiStrings.dart';
 import 'package:suraksha/Services/payment_service/cashFree_pay.dart';
@@ -92,7 +93,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                 index == 0
                     ? "Monthly"
                     : index == 1
-                        ? "Quarterly"
+                        ? "Half Yearly"
                         : "Yearly",
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -115,7 +116,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               Padding(
                 padding: const EdgeInsets.all(2.0),
                 child: Text(
-                  "Total: ₹ ${index == 0 ? monthRenewalCost : index == 1 ? quarterlyRenewalCost : yearlyRenewalCost}",
+                  "Total: ₹ ${index == 0 ? monthRenewalCost : index == 1 ? halfYearlyRenewalCost : yearlyRenewalCost}",
                   style: TextStyle(
                     color: CustomColors.secondaryColor,
                     fontWeight: FontWeight.bold,
@@ -203,49 +204,70 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                 ),
               ),
               widget.planStatus == '2'
-                  ? Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: AppButton(
-                          title: 'Renew',
-                          onTab: () async {
-                            await getPaymentId(
-                                name: widget.userData?.data?.user?.fullName,
-                                email: widget.userData?.data?.user?.email,
-                                mobile: widget.userData?.data?.user?.mobile,
-                                id: widget.userData?.data?.user?.tfaCode,
-                                amount: '${index == 0 ? monthRenewalCost : index == 1
-                                    ? quarterlyRenewalCost
-                                    : yearlyRenewalCost}');
+                  ? Column(
+                    children: [
+                      Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: AppButton(
+                              title: 'Renew',
+                              onTab: () async {
+                                await getPaymentId(
+                                    name: widget.userData?.data?.user?.fullName,
+                                    email: widget.userData?.data?.user?.email,
+                                    mobile: widget.userData?.data?.user?.mobile,
+                                    id: widget.userData?.data?.user?.tfaCode,
+                                    amount: '${index == 0 ? monthRenewalCost : index == 1
+                                        ? halfYearlyRenewalCost
+                                        : yearlyRenewalCost}');
 
-                            CashFreeHelper razorPay = CashFreeHelper(orderId ?? '1',context,paymentSessionId
-                                , (result) async {
-                              if (result != "error") {
-                                //payOrder(widget.model.bookingId, result);
-                                // buySubscription(index, result.toString());
+                                CashFreeHelper razorPay = CashFreeHelper(orderId ?? '1',context,paymentSessionId
+                                    , (result) async {
+                                  if (result != "error") {
+                                    //payOrder(widget.model.bookingId, result);
+                                    // buySubscription(index, result.toString());
 
-                                await addTransaction(
-                                    transactionId: '${result}',
-                                    amount:
-                                        '${index == 0 ? monthRenewalCost : index == 1 ? quarterlyRenewalCost : yearlyRenewalCost}',
-                                    discount: '0',
-                                    promo: '',
-                                    token: widget.token ?? '',
-                                    enDate: endDate);
-                                Navigator.pop(context);
-                                Fluttertoast.showToast(msg: 'Renewal success');
-                              } else {
+                                    await addTransaction(
+                                        transactionId: '${result}',
+                                        amount:
+                                            '${index == 0 ? monthRenewalCost : index == 1 ? halfYearlyRenewalCost : yearlyRenewalCost}',
+                                        discount: '0',
+                                        promo: '',
+                                        token: widget.token ?? '',
+                                        enDate: endDate);
+                                    Navigator.pop(context);
+                                    Fluttertoast.showToast(msg: 'Renewal success');
+                                  } else {
+                                    setState(() {
+                                      status = false;
+                                    });
+                                  }
+                                },);
+
                                 setState(() {
-                                  status = false;
+                                  status = true;
                                 });
-                              }
-                            },);
-
-                            setState(() {
-                              status = true;
-                            });
-                            razorPay.init();
-                          }),
-                    )
+                                razorPay.init();
+                              }),
+                        ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      AppButton(
+                          title: 'Renew Manually',
+                          onTab: () async {
+                            Navigator.pop(context);
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => PayScreen(
+                                        userToken: widget.token ?? '',
+                                        promo: '',
+                                        amount: '${index == 0 ? monthRenewalCost : index == 1 ? halfYearlyRenewalCost : yearlyRenewalCost}',
+                                        discount: '0',enddate: endDate,
+                                    )));
+                          })
+                    ],
+                  )
                   : SizedBox()
             ],
           ),
@@ -255,7 +277,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   }
 
   String? monthRenewalCost;
-  String? quarterlyRenewalCost;
+  String? halfYearlyRenewalCost;
   String? yearlyRenewalCost;
   String? setupCost;
 
@@ -329,8 +351,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       print(setupCost);
       monthRenewalCost =
           value['data']['plan_details']['monthly_renewal_cost'] ?? '';
-      quarterlyRenewalCost =
-          value['data']['plan_details']['quaterly_renewal_cost'] ?? '';
+      halfYearlyRenewalCost =
+          value['data']['plan_details']['half_yearly_renewal_cost'] ?? '';
       yearlyRenewalCost =
           value['data']['plan_details']['yearly_renewal_cost'] ?? '';
 

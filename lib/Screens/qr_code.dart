@@ -21,28 +21,30 @@ class _MyQrCodeState extends State<MyQrCode> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              alignment: Alignment.topCenter,
-              padding: const EdgeInsets.all(5.0),
-              child: const Text(
-                "Scan QR Code",
-                style: TextStyle(
-                    fontSize: 27.0,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.black),
-                textAlign: TextAlign.center,
-              ),
+            Stack(
+              children: [
+                Container(
+                  alignment: Alignment.topCenter,
+                  padding: const EdgeInsets.all(5.0),
+                  child: Image.asset('assets/images/qr_frame.png'),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: MediaQuery.of(context).size.height/6.6,
+                  child: Container(
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 60,vertical: 60),
+                  child:  Image(
+                    image: NetworkImage(
+                        '${widget.loginResponse?.data?.user?.qr_code}'),
+                  ),
+                ),)
+              ],
             ),
             // qr code image
-            Container(
-              padding:
-              const EdgeInsets.only(bottom: 30.0, left: 70.0, right: 70.0),
-              child:  Image(
-                image: NetworkImage(
-                    '${widget.loginResponse?.data?.user?.qr_code}'),
-              ),
-            ),
-            const SizedBox(
+
+            /*const SizedBox(
               height: 50.0,
             ),
             const Text(
@@ -75,6 +77,7 @@ class _MyQrCodeState extends State<MyQrCode> {
             const SizedBox(
               height: 10.0,
             ),
+            */
             Container(
               padding:
               const EdgeInsets.only(left: 30.0, right: 30.0, top: 20.0),
@@ -103,7 +106,7 @@ class _MyQrCodeState extends State<MyQrCode> {
                   );*/ //barcode scanner
                 },
                 child: const Text(
-                  "Scan your QR Code",
+                  "Scan QR Code",
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,

@@ -10,6 +10,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:suraksha/Screens/Home.dart';
+import 'package:suraksha/Screens/pay_to_admin.dart';
 import 'package:suraksha/Services/api_services/apiConstants.dart';
 import 'package:suraksha/Services/api_services/apiStrings.dart';
 import 'package:suraksha/Services/payment_service/cashFree_pay.dart';
@@ -104,14 +105,14 @@ class _VerifyOtpState extends State<VerifyOtp> {
               const SizedBox(
                 height: 10,
               ),
-              Text(
+              /*Text(
                 "${widget.otp}",
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
                   color: CustomColors.blackTemp,
                 ),
-              ),
+              ),*/
               const SizedBox(
                 height: 20,
               ),
@@ -324,55 +325,101 @@ class _VerifyOtpState extends State<VerifyOtp> {
                           dialogState(() {
                             isLoadingbtn = true;
                           });
+                          if (double.parse(setupCost ?? '0') != 0.0) {
+                            await getPaymentId(
+                                name: loginResponse?.data?.user?.fullName,
+                                email: loginResponse?.data?.user?.email,
+                                id: loginResponse?.data?.user?.suraksha_code,
+                                mobile: loginResponse?.data?.user?.mobile,
+                                amount: setupCost);
 
-                          await getPaymentId(
-                            name: loginResponse?.data?.user?.fullName,
-                            email: loginResponse?.data?.user?.email,
-                            id: loginResponse?.data?.user?.suraksha_code,
-                            mobile: loginResponse?.data?.user?.mobile,
-                            amount: setupCost
-                          );
+                            CashFreeHelper razorPay = CashFreeHelper(
+                                orderId ?? '1', context, paymentSessionId,
+                                (result) async {
+                              if (result != "error") {
+                                //payOrder(widget.model.bookingId, result);
+                                // buySubscription(index, result.toString());
+                                await addTransaction(
+                                    transactionId: '${result}',
+                                    promo: refController.text,
+                                    token:
+                                        '${loginResponse?.data?.user?.token}',
+                                    amount: '${setupCost}',
+                                    discount: discount ?? '0');
 
-                          CashFreeHelper razorPay = CashFreeHelper(
-                              orderId ?? '1', context,paymentSessionId, (result) async {
-                            if (result != "error") {
-                              //payOrder(widget.model.bookingId, result);
-                              // buySubscription(index, result.toString());
-                              await addTransaction(
-                                  transactionId: '${result}',
-                                  promo: refController.text,
-                                  token: '${loginResponse?.data?.user?.token}',
-                                  amount: '${setupCost}',
-                                  discount: discount ?? '0');
+                                if (true) {
+                                  SharedPreferences preferences =
+                                      await SharedPreferences.getInstance();
+                                  preferences.setString('token',
+                                      loginResponse?.data?.user?.token ?? '');
 
-                              if (true) {
-                                SharedPreferences preferences =
-                                    await SharedPreferences.getInstance();
-                                preferences.setString('token',
-                                    loginResponse?.data?.user?.token ?? '');
+                                  dialogState(() {
+                                    isLoadingbtn = false;
+                                  });
 
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => HomeScreen(),
+                                      ));
+                                } else {
+                                  Navigator.pop(context);
+                                }
+                              } else {
                                 dialogState(() {
                                   isLoadingbtn = false;
+                                  Navigator.pop(context);
                                 });
-
-                                Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => HomeScreen(),
-                                    ));
-                              } else {
-                                Navigator.pop(context);
                               }
-                            } else {
+                            });
+
+                            razorPay.init();
+                          }else {
+                            await addTransaction(
+                                transactionId: 'Full Discount',
+                                promo: refController.text,
+                                token:
+                                '${loginResponse?.data?.user?.token}',
+                                amount: '${setupCost}',
+                                discount: discount ?? '0');
+
+                            if (true) {
+                              SharedPreferences preferences =
+                              await SharedPreferences.getInstance();
+                              preferences.setString('token',
+                                  loginResponse?.data?.user?.token ?? '');
+
                               dialogState(() {
                                 isLoadingbtn = false;
-                                Navigator.pop(context);
                               });
-                            }
-                          });
 
-                          razorPay.init();
-                        }),
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => HomeScreen(),
+                                  ));
+                            } else {
+                              Navigator.pop(context);
+                            }
+                          }
+                        },
+                      ),
+                SizedBox(
+                  height: 10,
+                ),
+                AppButton(
+                    title: 'Pay Manually ${setupCost}/-',
+                    onTab: () async {
+                      Navigator.pop(context);
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => PayScreen(
+                                  userToken: loginResponse?.data?.user?.token,
+                                  promo: refController.text,
+                                  amount: '${setupCost}',
+                                  discount: discount ?? '0')));
+                    }),
               ],
             ),
           );
@@ -393,7 +440,7 @@ class _VerifyOtpState extends State<VerifyOtp> {
       monthRenewalCost =
           value['data']['plan_details']['monthly_renewal_cost'] ?? '';
       quarterlyRenewalCost =
-          value['data']['plan_details']['quaterly_renewal_cost'] ?? '';
+          value['data']['plan_details']['half_yearly_renewal_cost'] ?? '';
       yearlyRenewalCost =
           value['data']['plan_details']['yearly_renewal_cost'] ?? '';
 

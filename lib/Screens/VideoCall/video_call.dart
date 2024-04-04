@@ -7,7 +7,8 @@ import 'package:suraksha/Services/api_services/apiConstants.dart';
 import 'package:suraksha/utils/colors%20.dart';
 import 'package:suraksha/widgets/app_bar.dart';
 
-const appId = "a0017ef44c754838bc6747388dd2aadf";
+//String appId = "a0017ef44c754838bc6747388dd2aadf";
+String appId = "";
 const token = "a0017ef44c754838bc6747388dd2aadf";
 
 
@@ -40,10 +41,10 @@ class _MyVideoCallState extends State<VideoCall> {
   Future<void> initAgora() async {
     // retrieve permissions
     await [Permission.microphone, Permission.camera].request();
-
+print('_____________${appId}____________${widget.channel}');
     //create the engine
     _engine = createAgoraRtcEngine();
-    await _engine.initialize(const RtcEngineContext(
+    await _engine.initialize( RtcEngineContext(
       appId: appId,
       channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
     ));

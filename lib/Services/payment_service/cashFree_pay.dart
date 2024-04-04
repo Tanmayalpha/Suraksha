@@ -20,7 +20,7 @@ class CashFreeHelper {
   var cfPaymentGatewayService = CFPaymentGatewayService();
 
   CFCardWidget? cfCardWidget;
-  CFEnvironment environment = CFEnvironment.SANDBOX;
+  CFEnvironment environment = CFEnvironment.PRODUCTION;
 
 
   init() {

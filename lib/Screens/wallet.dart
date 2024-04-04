@@ -181,14 +181,14 @@ class _WalletState extends State<Wallet> {
                       const SizedBox(
                         height: 10,
                       ),
-                      AppButton(
+                      /*AppButton(
                         title: 'Withdraw Amount',
                         onTab: () {
                           setState(() {
                             show = !show;
                           });
                         },
-                      ),
+                      ),*/
                       Visibility(
                           visible: show,
                           child: Column(

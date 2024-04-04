@@ -26,9 +26,11 @@ String? passwordValidator(String? value) {
 String? emailValidator(String? value) {
   if (value == null ||
       value.isEmpty ||
-      !RegExp(r'^[a-z||A-Z||0-9]+@[a-z]+\.[a-z]{2,3}')
+      !RegExp(r'^[a-z||A-Z||0-9||.]+@[a-z]+\.[a-z]{2,3}')
           .hasMatch(value)) {
     return 'This value is required';
+//!RegExp(r'^[a-z||A-Z||0-9]+@[a-z]+\.[a-z]{2,3}')
+
   }
   return null;
 
@@ -58,7 +60,7 @@ Future<void> addTransaction(
    required String amount,
    required String discount,
    required String promo,
-   required String token, String? enDate}) async {
+   required String token, String? enDate,String? ssId}) async {
 
   bool status = false ;
   var prm = {
@@ -70,9 +72,12 @@ Future<void> addTransaction(
   'type_id': '1',
   'user_id':token
   };
-       if(enDate !=null){
+       if(enDate!=null && enDate !=''){
            prm['plan_ends'] = enDate ;
           }
+  if(ssId !=null && ssId !=''){
+    prm['screenshot_id'] = ssId ;
+  }
   apiBaseHelper.postAPICall(addTransactionApi, prm).then((getData) {
 
     print('${getData}');

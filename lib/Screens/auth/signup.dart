@@ -62,7 +62,6 @@ class _SignUpState extends State<SignUp> {
   num? otp;
   bool isLoading = false;
 
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -254,30 +253,37 @@ class _SignUpState extends State<SignUp> {
                           const SizedBox(
                             height: 50,
                           ),
-                          isLoading ? Center(child: CircularProgressIndicator(color: CustomColors.primaryColor,),) : AppButton(
-                            title: 'Sign Up',
-                            onTab: () {
-                              setState(() {
-                                isLoading = true;
-                              });
-                              if (_formKey.currentState!.validate()) {
-                                // sendOtp();
-                                if (passwordController.text !=
-                                    confirmController.text) {
-                                  Fluttertoast.showToast(
-                                      msg: "Password must be same");
-                                } else {
-                                  showDialogForPayment();
-                                }
-                                // registerUser();
-                              } else {
-                                setState(() {
-                                  isLoading = false;
-                                });
-                                // Fluttertoast.showToast(msg: "All Fields Are Required!");
-                              }
-                            },
-                          ),
+                          isLoading
+                              ? Center(
+                                  child: CircularProgressIndicator(
+                                    color: CustomColors.primaryColor,
+                                  ),
+                                )
+                              : AppButton(
+                                  title: 'Sign Up',
+                                  onTab: () {
+                                    setState(() {
+                                      isLoading = true;
+                                    });
+                                    if (_formKey.currentState!.validate()) {
+                                      // sendOtp();
+                                      if (passwordController.text !=
+                                          confirmController.text) {
+                                        Fluttertoast.showToast(
+                                            msg: "Password must be same");
+                                      } else {
+                                        //showDialogForPayment();
+                                        userSignup('');
+                                      }
+                                      // registerUser();
+                                    } else {
+                                      setState(() {
+                                        isLoading = false;
+                                      });
+                                      // Fluttertoast.showToast(msg: "All Fields Are Required!");
+                                    }
+                                  },
+                                ),
                           const SizedBox(
                             height: 20,
                           ),
@@ -328,100 +334,126 @@ class _SignUpState extends State<SignUp> {
           ),
         ));
   }
-  Function ? dialogMainState ;
+
+  Function? dialogMainState;
+
   showDialogForPayment() async {
     await showDialog(
       context: context,
-      builder: (context) =>StatefulBuilder(builder: (context, dialogSate) {
-        dialogMainState = dialogSate ;
-        return  AlertDialog(
-          shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          title: Image.asset(Images.splashLogo),
-          actions: [
-            Text('*You will have to pay INR ${setupCost}/-incl GST',style: TextStyle(fontSize: 16)),
-          ],
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: AppTextField(
-                      controller: refController,
-                      prefixIcon: Icons.vpn_key,
-                      hint: "Promo Code",
-                      inputType: TextInputType.text,
+      builder: (context) => StatefulBuilder(
+        builder: (context, dialogSate) {
+          dialogMainState = dialogSate;
+          return AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            title: Image.asset(Images.splashLogo),
+            actions: [
+              Text('*You will have to pay INR ${setupCost}/-incl GST',
+                  style: TextStyle(fontSize: 16)),
+            ],
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: AppTextField(
+                        controller: refController,
+                        prefixIcon: Icons.vpn_key,
+                        hint: "Promo Code",
+                        inputType: TextInputType.text,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 5,),
-                  Expanded(
-                    flex: 1,
-                    child: InkWell( onTap: () {
+                    SizedBox(
+                      width: 5,
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: InkWell(
+                          onTap: () {
+                            dialogSate(() {
+                              applyPromo();
+                            });
+                          },
+                          child: Container(
+                            height: 30,
+                            // width: 10,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(30),
+                              gradient: const LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  CustomColors.primaryColor,
+                                  CustomColors.secondaryColor
+                                ],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color:
+                                      CustomColors.blackTemp.withOpacity(0.5),
+                                  spreadRadius: 3,
+                                  blurRadius: 7,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.check,
+                              size: 25,
+                              color: CustomColors.whiteColor,
+                            ),
+                          )),
+                    )
+                  ],
+                ),
+                SizedBox(
+                  height: 30,
+                ),
+                AppButton(
+                    title: 'Pay & Signup',
+                    onTab: () async {
+                      await getPaymentId(
+                          name: nameController.text,
+                          mobile: mobileController.text,
+                          email: emailController.text,
+                          amount: setupCost ?? '1',
+                          id: '1');
 
-                      dialogSate((){
-                        applyPromo();
+                      CashFreeHelper razorPay = CashFreeHelper(
+                          orderId ?? '1', context, paymentSessionId,
+                          (result) async {
+                        if (result != "error") {
+                          //payOrder(widget.model.bookingId, result);
+                          // buySubscription(index, result.toString());
+                          userSignup(result);
+                          Navigator.pop(context);
+                        } else {
+                          setState(() {
+                            status = false;
+                          });
+                        }
                       });
 
-                    },child: Container(
-                      height: 30,
-                      // width: 10,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(30),
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [CustomColors.primaryColor, CustomColors.secondaryColor],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: CustomColors.blackTemp.withOpacity(0.5),
-                            spreadRadius: 3,
-                            blurRadius: 7,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-
-                      ),child: Icon(Icons.check, size: 25,color: CustomColors.whiteColor,),)),
-                  )
-                ],),
-              SizedBox(height: 30,),
-              AppButton(title: 'Pay & Signup', onTab: () async{
-
-              await  getPaymentId(name: nameController.text,mobile: mobileController.text,email: emailController.text,amount: setupCost ?? '1',id: '1');
-
-              CashFreeHelper razorPay =  CashFreeHelper(
-                  orderId ?? '1', context,paymentSessionId, (result) async{
-                  if (result != "error") {
-                    //payOrder(widget.model.bookingId, result);
-                    // buySubscription(index, result.toString());
-                    userSignup(result);
-                    Navigator.pop(context);
-
-                  } else {
-                    setState(() {
-                      status = false;
-                    });
-                  }
-                });
-
-                setState(() {
-                  status = true;
-                });
-                razorPay.init();
-              }),
-
-            ],),) ;
-      },),
+                      setState(() {
+                        status = true;
+                      });
+                      razorPay.init();
+                    }),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
-String ? discount ;
-  Future<void> userSignup(result) async {
+  String? discount;
 
+  Future<void> userSignup(result) async {
     setState(() {
-      isLoading = true ;
+      isLoading = true;
     });
     String? token = await FirebaseMessaging.instance.getToken();
     var param = {
@@ -438,25 +470,28 @@ String ? discount ;
 
       if (error) {
         Fluttertoast.showToast(msg: 'User registered successfully!');
-        SharedPreferences preferences = await SharedPreferences.getInstance();
-        preferences.setString('token', value['data']['user']['token'] ?? '');
-       await addTransaction(transactionId: '${result}', promo: refController.text,token: '${value['data']['user']['token'] ?? ''}', amount: '${setupCost}', discount: discount ??'0');
+       // SharedPreferences preferences = await SharedPreferences.getInstance();
+        //preferences.setString('token', value['data']['user']['token'] ?? '');
+        /*await addTransaction(
+            transactionId: '${result}',
+            promo: refController.text,
+            token: '${value['data']['user']['token'] ?? ''}',
+            amount: '${setupCost}',
+            discount: discount ?? '0');*/
         setState(() {
-          isLoading = false ;
+          isLoading = false;
         });
 
-          Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HomeScreen(),
-              ));
-
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Login(),
+            ));
       } else {
         Fluttertoast.showToast(msg: msg);
       }
     });
   }
-
 
   String? setupCost;
 
@@ -468,32 +503,34 @@ String ? discount ;
     apiBaseHelper.getAPICall(getPlanCostApi).then((value) async {
       setupCost = value['data']['plan_details']['setup_cost'] ?? '';
       print(setupCost);
-      monthRenewalCost = value['data']['plan_details']['monthly_renewal_cost'] ?? '';
-      quarterlyRenewalCost = value['data']['plan_details']['quaterly_renewal_cost'] ?? '';
-      yearlyRenewalCost = value['data']['plan_details']['yearly_renewal_cost'] ?? '';
+      monthRenewalCost =
+          value['data']['plan_details']['monthly_renewal_cost'] ?? '';
+      quarterlyRenewalCost =
+          value['data']['plan_details']['quaterly_renewal_cost'] ?? '';
+      yearlyRenewalCost =
+          value['data']['plan_details']['yearly_renewal_cost'] ?? '';
       setState(() {});
     });
   }
+
   bool status = false;
 
-
   Future<void> applyPromo() async {
-    var param = {
-      "code": refController.text.trim()
-    };
+    var param = {"code": refController.text.trim()};
 
-    apiBaseHelper.postAPICall(applyPromoApi,param).then((getData) async {
+    apiBaseHelper.postAPICall(applyPromoApi, param).then((getData) async {
       bool status = getData['status'] ?? true;
       String msg = getData['message'] ?? '';
-      
-      if(status) {
-        Fluttertoast.showToast(msg: '${getData['data']['discount_amount']}/- discount ${msg}');
-        discount = getData['data']['discount_amount'].toString() ;
+
+      if (status) {
+        Fluttertoast.showToast(
+            msg: '${getData['data']['discount_amount']}/- discount ${msg}');
+        discount = getData['data']['discount_amount'].toString();
         var data = ApplyCouponResponse.fromJson(getData);
         setupCost = data.data?.updatedPrice.toString();
-        dialogMainState!((){});
+        dialogMainState!(() {});
         print(setupCost);
-      }else {
+      } else {
         Fluttertoast.showToast(msg: msg);
       }
 
@@ -504,9 +541,15 @@ String ? discount ;
   String? orderId;
   String? paymentSessionId;
 
-  Future<void> getPaymentId({String? name,String? email,String? mobile, String? amount,String? id}) async {
+  Future<void> getPaymentId(
+      {String? name,
+      String? email,
+      String? mobile,
+      String? amount,
+      String? id}) async {
     var headers = {'Content-Type': 'application/json'};
-    var request = http.Request('POST', Uri.parse('${baseUrl}createOrderSession'));
+    var request =
+        http.Request('POST', Uri.parse('${baseUrl}createOrderSession'));
     request.body = json.encode({
       "customer_id": id ?? "1",
       "customer_name": name ?? "Shubham",
@@ -525,11 +568,8 @@ String ? discount ;
 
       orderId = finalResult['data']['response']['order_id'];
       paymentSessionId = finalResult['data']['response']['payment_session_id'];
-    }
-    else {
+    } else {
       print(response.reasonPhrase);
     }
   }
-
-
 }

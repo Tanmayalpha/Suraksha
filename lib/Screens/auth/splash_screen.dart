@@ -3,8 +3,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:suraksha/Screens/Home.dart';
+import 'package:suraksha/Screens/VideoCall/video_call.dart';
 import 'package:suraksha/Screens/auth/login.dart';
 import 'package:suraksha/Screens/auth/newlogIn.dart';
+import 'package:suraksha/Services/api_services/apiConstants.dart';
 import 'package:suraksha/utils/app_images.dart';
 import 'package:suraksha/utils/colors%20.dart';
 
@@ -32,6 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     // TODO: implement initState
+    getAgoraAppId();
      Timer(const Duration(seconds: 3), () {
        checkLogin();
       });
@@ -45,5 +48,18 @@ class _SplashScreenState extends State<SplashScreen> {
        width: MediaQuery.of(context).size.width/1.5,
          child: Image.asset(Images.splashLogo,))),
     );
+  }
+
+ Future<void> getAgoraAppId() async{
+    apiBaseHelper.getAPICall(Uri.parse('${baseUrl}agora_app_id')).then((value) {
+
+      bool status = value['status'];
+
+      if(status) {
+        appId =  value['data']['agora_app_id']['app_id'];
+
+      }
+
+    });
   }
 }
