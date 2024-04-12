@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:suraksha/Screens/Home.dart';
 import 'package:suraksha/Screens/pay_to_admin.dart';
+import 'package:suraksha/Screens/subscription/subscription.dart';
 import 'package:suraksha/Services/api_services/apiConstants.dart';
 import 'package:suraksha/Services/api_services/apiStrings.dart';
 import 'package:suraksha/Services/payment_service/cashFree_pay.dart';
@@ -215,6 +216,12 @@ class _VerifyOtpState extends State<VerifyOtp> {
           Fluttertoast.showToast(msg: 'You are unSubscribed user');
 
           showDialogForPayment();
+        } else if(loginResponse?.data?.user?.planStatus == '2'){
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SubscriptionScreen(token: loginResponse?.data?.user?.token,planStatus: loginResponse?.data?.user?.planStatus,userData: loginResponse,isFromLogin: true),
+              ));
         } else {
           SharedPreferences preferences = await SharedPreferences.getInstance();
           preferences.setString(

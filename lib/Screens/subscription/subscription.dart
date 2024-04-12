@@ -4,6 +4,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:suraksha/Screens/Home.dart';
 import 'package:suraksha/Screens/pay_to_admin.dart';
 import 'package:suraksha/Services/api_services/apiConstants.dart';
 import 'package:suraksha/Services/api_services/apiStrings.dart';
@@ -18,12 +20,13 @@ import 'package:http/http.dart'as http;
 
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen(
-      {Key? key, this.token, this.planStatus, this.userData})
+      {Key? key, this.token, this.planStatus, this.userData,this.isFromLogin})
       : super(key: key);
 
   final String? token;
 
   final String? planStatus;
+  final bool? isFromLogin;
 
   final LoginResponse? userData;
 
@@ -234,8 +237,18 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                         promo: '',
                                         token: widget.token ?? '',
                                         enDate: endDate);
-                                    Navigator.pop(context);
-                                    Fluttertoast.showToast(msg: 'Renewal success');
+                                    if(widget.isFromLogin ?? false ){
+                                      SharedPreferences preferences = await SharedPreferences.getInstance();
+                                      preferences.setString('token', widget.userData?.data?.user?.token ?? '');
+                                      Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => HomeScreen(),
+                                          ));
+                                    }else {
+                                        Navigator.pop(context);
+                                      }
+                                      Fluttertoast.showToast(msg: 'Renewal success');
                                   } else {
                                     setState(() {
                                       status = false;

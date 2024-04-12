@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:suraksha/Screens/Home.dart';
 import 'package:suraksha/Screens/auth/signup.dart';
 import 'package:suraksha/Screens/auth/verify_otp.dart';
+import 'package:suraksha/Screens/subscription/subscription.dart';
 import 'package:suraksha/Screens/test/test_payment.dart';
 import 'package:suraksha/Services/api_services/apiConstants.dart';
 import 'package:suraksha/Services/payment_service/cashFree_pay.dart';
@@ -48,6 +49,7 @@ class _LoginState extends State<Login> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    getPlanCost();
   }
 
   int _value = 1;
@@ -378,6 +380,7 @@ class _LoginState extends State<Login> {
       if(status){
         Fluttertoast.showToast(msg: msg);
         loginResponse = LoginResponse.fromJson(getData);
+
         if(loginResponse?.data?.user?.planStatus == '0'){
           Fluttertoast.showToast(msg: 'You are unSubscribed user');
           /*Navigator.pushReplacement(
@@ -386,7 +389,13 @@ class _LoginState extends State<Login> {
                 builder: (context) => HomeScreen(),
               ));*/
             showDialogForPayment();
-        }else {
+        }else if(loginResponse?.data?.user?.planStatus == '2'){
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SubscriptionScreen(token: loginResponse?.data?.user?.token,planStatus: loginResponse?.data?.user?.planStatus,userData: loginResponse,isFromLogin: true),
+              ));
+        } else{
           SharedPreferences preferences = await SharedPreferences.getInstance();
           preferences.setString('token', loginResponse?.data?.user?.token ?? '');
           Navigator.pushReplacement(
